@@ -147,21 +147,7 @@ def get_extensions():
         from torch.utils.cpp_extension import ROCM_HOME
         is_rocm_pytorch = True if ((torch.version.hip is not None) and (ROCM_HOME is not None)) else False
 
-    if is_rocm_pytorch:
-        hipify_python.hipify(
-            project_directory=this_dir,
-            output_directory=this_dir,
-            includes="torchvision/csrc/cuda/*",
-            show_detailed=True,
-            is_pytorch_extension=True,
-        )
-        source_cuda = glob.glob(os.path.join(extensions_dir, 'hip', '*.hip'))
-        # Copy over additional files
-        shutil.copy("torchvision/csrc/cuda/cuda_helpers.h", "torchvision/csrc/hip/cuda_helpers.h")
-        shutil.copy("torchvision/csrc/cuda/vision_cuda.h", "torchvision/csrc/hip/vision_cuda.h")
-
-    else:
-        source_cuda = glob.glob(os.path.join(extensions_dir, 'cuda', '*.cu'))
+    source_cuda = glob.glob(os.path.join(extensions_dir, 'cuda', '*.cu'))
 
     sources = main_file + source_cpu
     extension = CppExtension
@@ -193,7 +179,7 @@ def get_extensions():
             else:
                 nvcc_flags = nvcc_flags.split(' ')
         else:
-            define_macros += [('WITH_HIP', None)]
+            define_macros += [('WITH_CUDA', None)]
             nvcc_flags = []
         extra_compile_args = {
             'cxx': [],
